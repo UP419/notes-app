@@ -49,8 +49,6 @@ module.exports.getNotesByUser = async (req, res) => {
             try {
                 console.log(user.email);
                 const notes = await Note.find({ user: user.email });
-                console.log('notes found');
-                console.log(notes);
                 if (!notes.length) {
                   return res.status(404).json({ error: 'No notes found for this user' });
                 }
