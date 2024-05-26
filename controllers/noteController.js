@@ -1,13 +1,27 @@
 const Note = require("../models/Note");
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
+
 
 module.exports.addNote = async (req, res) => {
-    const { user, note } = req.body;
-    try {
-      const savedNote = await Note.create({user, note});
-      res.status(201).json(savedNote);
-      res.send('note added');
-    } catch (err) {
-      res.status(400).json({ error: err.message });
+    const { note } = req.body;
+    const token = req.cookies.jwt;
+    if (token) {
+        jwt.verify(token, 'this is jwt secred string', async (err, decodedToken) => {
+          if (err) {
+            res.locals.user = null;
+            next();
+          } else {
+            let user = await User.findById(decodedToken.id);
+            try {
+                const savedNote = await Note.create({user: user.email, note});
+                res.status(201).json(savedNote);
+                console.log('new note added');
+              } catch (err) {
+                res.status(400).json({ error: err.message });
+              }       
+          }
+        });
     }
 }
 
